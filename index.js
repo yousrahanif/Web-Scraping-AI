@@ -20,9 +20,9 @@ const client = new MongoClient(uri, {
 });
 
 // Middleware
-app.use(express.json());
-app.use(express.static('public'));
-app.use(morgan('dev'));
+app.use(express.json()); // Parse JSON request bodies
+app.use(express.static('public')); // Serve static files from the 'public' directory
+app.use(morgan('dev')); // Log HTTP requests
 
 // Function to connect to MongoDB and handle data insertion
 async function connectToMongoDB() {
@@ -38,40 +38,39 @@ async function connectToMongoDB() {
 
 // Route for scraping a webpage title
 app.post('/scrape', async (req, res) => {
-    const { url } = req.body;
-  
-    if (!url) {
-      return res.status(400).send('URL is required');
-    }
-  
-    try {
-      const collection = await connectToMongoDB();
-  
-      // Launch Puppeteer and scrape the webpage title
-      const browser = await puppeteer.launch({ headless: true });
-      const page = await browser.newPage();
-      await page.goto(url, { waitUntil: 'domcontentloaded' });
-  
-      // Extract the title of the webpage
-      const title = await page.evaluate(() => {
-        const titleElement = document.querySelector('title');
-        return titleElement ? titleElement.textContent.trim() : 'No title found';
-      });
-  
-      await browser.close();
-  
-      // Insert the scraped title into MongoDB
-      const result = await collection.insertOne({ url, title, date: new Date() });
-      console.log('Title inserted into MongoDB:', result.insertedId);
-  
-      // Send a response with a message and the title
-      res.status(200).send(`Title of the webpage: ${title}`);
-    } catch (error) {
-      console.error('Error scraping the webpage:', error);
-      res.status(500).send('Error scraping the webpage');
-    }
-  });
-  
+  const { url } = req.body;
+
+  if (!url) {
+    return res.status(400).send('URL is required');
+  }
+
+  try {
+    const collection = await connectToMongoDB();
+
+    // Launch Puppeteer and scrape the webpage title
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+    // Extract the title of the webpage
+    const title = await page.evaluate(() => {
+      const titleElement = document.querySelector('title');
+      return titleElement ? titleElement.textContent.trim() : 'No title found';
+    });
+
+    await browser.close();
+
+    // Insert the scraped title into MongoDB
+    const result = await collection.insertOne({ url, title, date: new Date() });
+    console.log('Title inserted into MongoDB:', result.insertedId);
+
+    // Send a response with a message and the title
+    res.status(200).send(`Title of the webpage: ${title}`);
+  } catch (error) {
+    console.error('Error scraping the webpage:', error);
+    res.status(500).send('Error scraping the webpage');
+  }
+});
 
 // Route to serve the frontend
 app.get('/', (req, res) => {
