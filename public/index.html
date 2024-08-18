@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Scraper with AI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+    }
+
+    .container {
+      text-align: center;
+      background-color: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #4A90E2;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #scrapeButton {
+      background-color: #4CAF50;
+    }
+
+    #clearButton {
+      background-color: #f44336;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Web Scraper with AI</h1>
+    <form id="scrapeForm">
+      <input type="text" id="url" placeholder="Enter URL" required />
+      <div>
+        <button type="submit" id="scrapeButton">Scrape</button>
+        <button type="button" id="clearButton">Clear</button>
+      </div>
+    </form>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById('scrapeForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const url = document.getElementById('url').value;
+
+      const response = await fetch('/scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      const data = await response.text();
+      document.getElementById('result').textContent = data;
+    });
+
+    document.getElementById('clearButton').addEventListener('click', () => {
+      document.getElementById('url').value = '';
+      document.getElementById('result').textContent = '';
+    });
+  </script>
+</body>
+</html>
